@@ -135,13 +135,61 @@ Una vez esté conectado al clúster y habilitada la línea de comandos de Kubern
 
 ## Despliegue de Apache Tomcat
 
-Traemos tomcat desde el repositorio oficial de docker con el siguiente comando: ```sudo docker pull tomcat``` y esperamos a que se complete la descarga de la última versión.
+**Tenga en cuenta lo siguientes requisitos previos antes de realizar el despliegue de la aplicación:** 
+- Debe tener previamente instalado Docker, puede ver en el siguiente enlace la instalación de Docker según el sistema operativo con el que cuente usted. https://docs.docker.com/v17.12/install/linux/docker-ce/ubuntu/
+- Debe tener instalada la CLI y los plugins de IBM Cloud, para realizar esto puede dirigirse al siguiente enlace. https://cloud.ibm.com/docs/containers?topic=containers-cs_cli_install
+
+- Para realizar el despliegue de la aplicación correctamente, primero debe configurar el espacio de trabajo como se ve a continuación (region, grupo de recurso y cluster).
+
+Inicio de sesion en la consola de IBM Cloud en la region y el grupo de recursos del cluster
+
+```
+ibmcloud login -a cloud.ibm.com -r <region> -g <grupo de recursos>
+```
+
+Descargue de los archivos de configuracion para el cluster
+
+```
+ibmcloud ks cluster config --cluster <ID_Cluster>
+```
+Luego de realizar el paso anterior usted debe crear el namespace donde alojara su aplicación, para hacer eso usted debe ejecutar el siguiente comando en su terminal.
+
+```
+ibmcloud cr namespace-add <my_namespace>
+```
+
+Traemos tomcat desde el repositorio oficial de docker con el siguiente comando: ```Docker pull tomcat:latest``` y esperamos a que se complete la descarga de la última versión.
 
 <img width="650" alt="1" src="https://user-images.githubusercontent.com/50923637/69654077-33226700-1042-11ea-90d9-c6d717f36e2f.png">
 
 Una vez completa la descarga podemos revisar que imágenes hemos descargado a nuestro clúster con el siguiente comando: ```docker images```.
 
 <img width="650" alt="2" src="https://user-images.githubusercontent.com/50923637/69654146-4f260880-1042-11ea-9469-7d6d6c4898f1.png">
+
+Luego debe instalar todos los plugins del container registry, esto lo realiza ejecutando el siguiente comando.
+```
+Ibmcloud plugin install container-registry
+```
+
+Luego debe acceder nuevamente a su cuenta de IBM Cloud con el siguiente comando para acceder al container registry.
+```
+Ibmcloud cr login
+```
+Después debe acceder al namespace que creo previamente, con el siguiente comando.
+
+```
+namespace -> k8-demo-east
+```
+
+Luego para ver las imágenes en el container registry debe ejecutar el siguiente comando.
+```
+ibmcloud cr images
+
+```
+Luego debe hacerle un tag a la imagen para que pueda hacer el push en un paso posterior y no le genere inconvenientes, para realizar esto debe ejecutar el siguiente comando.
+```
+docker tag tomcat:latest us.icr.io/k8-demo-east/tomcat:v1.0
+```
 
 Una vez hallamos verificado que la imagen se encuentra descargada es necesario realizarle el push a la imagen de Tomcat para poder subirla al clúster con el siguiente comando: ```docker push registry.ng.bluemix.net/<nombre del cluster>/tomcat```.
 
@@ -151,7 +199,7 @@ En este caso nos indica que la imagen ya está en el clúster, en caso de que no
 
 <img width="650" alt="4" src="https://user-images.githubusercontent.com/50923637/69654346-9f9d6600-1042-11ea-914d-f18d4d032991.png">
 
-Como se pude observar la imagen ya se encuentra subida en el clúster, ahora el siguiente paso es crear el despliegue, al cual le tiene que asignar un nombre para eso volvemos al entorno Ubuntu y el terminal se digita el siguiente comando: ```kubectl run <nombre del servicio> --image=registry.ng.bluemix.net/<nombre del cluster/tomcat>```.
+Como se pude observar la imagen ya se encuentra subida en el clúster, ahora el siguiente paso es crear el despliegue, al cual le tiene que asignar un nombre para eso volvemos al entorno Ubuntu y el terminal se digita el siguiente comando: ```./kubectl run <nombre del servicio> --image=registry.ng.bluemix.net/<nombre del cluster/tomcat>```.
 
 <img width="650" alt="5" src="https://user-images.githubusercontent.com/50923637/69654420-c8bdf680-1042-11ea-9bff-3bed07eff7e8.png">
 
